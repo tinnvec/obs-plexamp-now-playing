@@ -1,0 +1,59 @@
+<html>
+  <head>
+    <meta http-equiv="refresh" content="{{refreshRate}}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Oxanium:wght@200;300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+      body {
+        background-color: #00FF00;
+        color: aliceblue;
+        font-family: 'Oxanium', cursive;
+        font-weight: 700;
+      }
+
+      img {
+        height: 200px;
+        width: 200px;
+      }
+
+      p {
+        margin: 0;
+        overflow: hidden;
+      }
+
+      #thumbnail {
+        float: left;
+        padding-right: 1rem;
+      }
+
+      #title {
+        font-size: 4rem;
+        padding-bottom: 1rem;
+      }
+
+      #artist {
+        font-size: 3rem;
+      }
+
+      #album {
+        color: grey;
+        font-size: 2rem;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="now_playing">
+      <div id="thumbnail">
+        <img src="{{thumbUrl}}" />
+      </div>
+
+      <div id="track_info">
+        <p id="title">{{title}}</p>
+        <p id="artist">{{artist}}</p>
+        <p id="album">{{album}}</p>
+      </div>
+    </div>
+  </body>
+</html>
