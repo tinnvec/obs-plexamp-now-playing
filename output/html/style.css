@@ -1,0 +1,39 @@
+@font-face {
+  font-family: oxanium, cursive;
+  src: url("Oxanium-VariableFont_wght.ttf");
+}
+
+body {
+  background-color: #00FF00;
+}
+
+img {
+  height: 200px;
+  width: 200px;
+}
+
+p {
+  margin: 0;
+  font-family: oxanium;
+  font-weight: 700;
+  color: antiquewhite;
+  overflow: hidden;
+}
+
+#thumbnail {
+  float: left;
+  padding-right: 1rem;
+}
+
+#title {
+  font-size: 4rem;
+  padding-bottom: 1rem;
+}
+
+#artist {
+  font-size: 3rem;
+}
+
+#album {
+  font-size: 2rem;
+}

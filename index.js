@@ -2,11 +2,10 @@ import { writeFileSync } from "fs";
 import PlexAPI from "plex-api";
 import { stdout } from "process";
 
-import { PLEX_HOSTNAME, PLEX_PORT, PLEX_HTTPS, PLEX_TOKEN, POLLING_RATE, OUTPUT_TEXT_FILENAME, TEXT_SEPARATOR } from "./config/settings.js";
+import { PLEX_HOSTNAME, PLEX_PORT, PLEX_HTTPS, PLEX_TOKEN, POLLING_RATE, OUTPUT_TEXT_FILENAME, TEXT_SEPARATOR, OUTPUT_MODE } from "./config/settings.js";
 
 const baseUrl = `http${PLEX_HTTPS ? "s": ""}://${PLEX_HOSTNAME}:${PLEX_PORT}`;
 const client = new PlexAPI({ hostname: PLEX_HOSTNAME, port: PLEX_PORT, https: PLEX_HTTPS, token: PLEX_TOKEN});
-const outputTextFile = `./output/text/${OUTPUT_TEXT_FILENAME}`;
 
 console.log(`Monitoring Plex server at ${baseUrl}`);
 
@@ -29,7 +28,7 @@ function handleNowPlaying(plexSession) {
   }
 
   if (sessionMediaContainer.size === 0) {
-    console.log("Nothing Playing");
+    updateLog("Nothing Playing");
     return;
   }
 
@@ -43,11 +42,43 @@ function handleNowPlaying(plexSession) {
   const currentSong = sessionMetadata[0];
 
   const artist = currentSong.grandparentTitle;
+  const album = currentSong.parentTitle;
   const title = currentSong.title;
   
-  updateLog(`Now playing: ${artist} - ${title}`);
+  updateLog(`Now playing: ${artist} - ${album} - ${title}`);
 
-  writeFileSync(outputTextFile, `${artist} - ${title}${TEXT_SEPARATOR}`);
+  let outputFile;
+  let content;
+
+  if (OUTPUT_MODE === "html") {
+    const thumbUrl = `${baseUrl}${currentSong.thumb}?X-Plex-Token=${PLEX_TOKEN}`;
+    outputFile = "./output/html/index.html";
+    content =
+`<html>
+  <head>
+    <meta http-equiv="refresh" content="${POLLING_RATE / 1000}">
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body>
+    <div id="now_playing">
+      <div id="thumbnail">
+        <img src="${thumbUrl}" />
+      </div>
+
+      <div id="track_info">
+        <p id="title">${title}</p>
+        <p id="artist">${artist}</p>
+        <p id="album">${album}</p>
+      </div>
+    </div>
+  </body>
+</html>`;
+  } else {
+    outputFile = `./output/text/${OUTPUT_TEXT_FILENAME}`;
+    content = `${artist} - ${title}${TEXT_SEPARATOR}`;
+  }
+
+  writeFileSync(outputFile, content);
 }
 
 function handleQueryError(error) {

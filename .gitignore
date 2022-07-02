@@ -4,5 +4,8 @@ config/settings.js
 # Text output
 output/text/*.txt
 
+# HTML output
+output/html/*.html
+
 # node modules
 node_modules/
