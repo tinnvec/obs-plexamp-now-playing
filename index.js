@@ -1,33 +1,58 @@
-import { readFileSync, writeFileSync } from "fs";
+import { writeFileSync } from "fs";
+import PlexAPI from "plex-api";
 import { stdout } from "process";
 
-import { PLAY_QUEUE_LOCATION, OUTPUT_TEXT_FILENAME, TEXT_SEPARATOR, POLLING_RATE } from "./config/settings.js";
+import { PLEX_HOSTNAME, PLEX_PORT, PLEX_HTTPS, PLEX_TOKEN, POLLING_RATE, OUTPUT_TEXT_FILENAME, TEXT_SEPARATOR } from "./config/settings.js";
 
-const queueFile = `${PLAY_QUEUE_LOCATION}\\PlayQueue.json`;
+const baseUrl = `http${PLEX_HTTPS ? "s": ""}://${PLEX_HOSTNAME}:${PLEX_PORT}`;
+const client = new PlexAPI({ hostname: PLEX_HOSTNAME, port: PLEX_PORT, https: PLEX_HTTPS, token: PLEX_TOKEN});
 const outputTextFile = `./output/text/${OUTPUT_TEXT_FILENAME}`;
 
-console.log(`Watching ${queueFile}`);
+console.log(`Monitoring Plex server at ${baseUrl}`);
 
 setInterval(() => {
-  try {
-    const fileContents = JSON.parse(readFileSync(queueFile));
-    const playQueue = fileContents["data"]["MediaContainer"];
-
-    const currentSongID = playQueue["playQueueSelectedItemID"];
-    const index = playQueue["Metadata"].findIndex(_ => _["playQueueItemID"] === currentSongID);
-    const currentSong = playQueue["Metadata"][index];
-    
-    const artist = currentSong["grandparentTitle"];
-    const title = currentSong["title"];
-    
-    updateLog(`Now Playing: ${artist} - ${title}`);
-    const content = `${artist} - ${title}${TEXT_SEPARATOR}`;
-    
-    writeFileSync(outputTextFile, content);
-  } catch (error) {
-    console.log(error);
-  }
+  client.query("/status/sessions")
+    .then(handleNowPlaying, handleQueryError);
 }, POLLING_RATE);
+
+function handleNowPlaying(plexSession) {
+  if (plexSession === undefined) {
+    console.log("ERROR: Can't find Plex session");
+    return;
+  }
+
+  const sessionMediaContainer = plexSession.MediaContainer;
+  
+  if (sessionMediaContainer === undefined) {
+    console.log("ERROR: Can't find Plex session MediaContainer");
+    return;
+  }
+
+  if (sessionMediaContainer.size === 0) {
+    console.log("Nothing Playing");
+    return;
+  }
+
+  const sessionMetadata = sessionMediaContainer.Metadata;
+
+  if (sessionMetadata === undefined) {
+    console.log("ERROR: Can't find MediaContainer Metadata");
+    return;
+  }
+
+  const currentSong = sessionMetadata[0];
+
+  const artist = currentSong.grandparentTitle;
+  const title = currentSong.title;
+  
+  updateLog(`Now playing: ${artist} - ${title}`);
+
+  writeFileSync(outputTextFile, `${artist} - ${title}${TEXT_SEPARATOR}`);
+}
+
+function handleQueryError(error) {
+  console.log(error);
+}
 
 // Rewrites final line of stdout
 function updateLog(text) {
