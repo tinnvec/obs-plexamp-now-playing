@@ -1,0 +1,5 @@
+# App Settings
+config/settings.js
+
+# Text output
+output/text/*.txt
