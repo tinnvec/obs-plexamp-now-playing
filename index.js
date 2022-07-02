@@ -2,17 +2,21 @@ import { readFileSync, writeFileSync } from "fs";
 import PlexAPI from "plex-api";
 import { stdout } from "process";
 import nodeHtmlToImage from "node-html-to-image";
+import { dirname } from 'path';
+import { fileURLToPath } from 'url';
 
 import { PLEX_HOSTNAME, PLEX_PORT, PLEX_HTTPS, PLEX_TOKEN, POLLING_RATE, OUTPUT_TEXT_FILENAME, TEXT_SEPARATOR, OUTPUT_MODE, NO_SONG_TEXT, OUTPUT_IMAGE_FILENAME } from "./config/settings.js";
+
+const cwd = dirname(fileURLToPath(import.meta.url));
 
 const baseUrl = `http${PLEX_HTTPS ? "s": ""}://${PLEX_HOSTNAME}:${PLEX_PORT}`;
 const client = new PlexAPI({ hostname: PLEX_HOSTNAME, port: PLEX_PORT, https: PLEX_HTTPS, token: PLEX_TOKEN});
 
-const blankThumb = readFileSync("./assets/blank_thumbnail.png");
+const blankThumb = readFileSync(`${cwd}/assets/blank_thumbnail.png`);
 const base64Image = new Buffer.from(blankThumb).toString("base64");
 const blankThumbUri = `data:image/jpeg;base64,${base64Image}`;
 
-const template = readFileSync("./assets/output-template.html").toString();
+const template = readFileSync(`${cwd}/assets/output-template.html`).toString();
 
 console.log(`Monitoring Plex server at ${baseUrl}`);
 
@@ -60,7 +64,7 @@ function handleNowPlaying(plexSession) {
   let logOutput;
 
   if (OUTPUT_MODE === "text") {
-    outputFile = `./output/text/${OUTPUT_TEXT_FILENAME}`;
+    outputFile = `${cwd}/output/text/${OUTPUT_TEXT_FILENAME}`;
     
     if (sessionMediaContainer.size === 0) {
       content = NO_SONG_TEXT;
@@ -71,7 +75,7 @@ function handleNowPlaying(plexSession) {
     logOutput = content;
     content += TEXT_SEPARATOR;
   } else {
-    outputFile = "./output/html/index.html";
+    outputFile = `${cwd}/output/html/index.html`;
 
     let thumbUrl;
 
@@ -95,7 +99,7 @@ function handleNowPlaying(plexSession) {
 
   if (OUTPUT_MODE === "image") {
     nodeHtmlToImage({
-      output: `./output/image/${OUTPUT_IMAGE_FILENAME}`,
+      output: `${cwd}/output/image/${OUTPUT_IMAGE_FILENAME}`,
       html: content
     });
   } else {
