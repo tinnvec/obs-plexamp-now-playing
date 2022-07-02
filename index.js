@@ -1,8 +1,9 @@
 import { readFileSync, writeFileSync } from "fs";
 import PlexAPI from "plex-api";
 import { stdout } from "process";
+import nodeHtmlToImage from "node-html-to-image";
 
-import { PLEX_HOSTNAME, PLEX_PORT, PLEX_HTTPS, PLEX_TOKEN, POLLING_RATE, OUTPUT_TEXT_FILENAME, TEXT_SEPARATOR, OUTPUT_MODE, NO_SONG_TEXT } from "./config/settings.js";
+import { PLEX_HOSTNAME, PLEX_PORT, PLEX_HTTPS, PLEX_TOKEN, POLLING_RATE, OUTPUT_TEXT_FILENAME, TEXT_SEPARATOR, OUTPUT_MODE, NO_SONG_TEXT, OUTPUT_IMAGE_FILENAME } from "./config/settings.js";
 
 const baseUrl = `http${PLEX_HTTPS ? "s": ""}://${PLEX_HOSTNAME}:${PLEX_PORT}`;
 const client = new PlexAPI({ hostname: PLEX_HOSTNAME, port: PLEX_PORT, https: PLEX_HTTPS, token: PLEX_TOKEN});
@@ -10,6 +11,8 @@ const client = new PlexAPI({ hostname: PLEX_HOSTNAME, port: PLEX_PORT, https: PL
 const blankThumb = readFileSync("./assets/blank_thumbnail.png");
 const base64Image = new Buffer.from(blankThumb).toString("base64");
 const blankThumbUri = `data:image/jpeg;base64,${base64Image}`;
+
+const template = readFileSync("./assets/output-template.html").toString();
 
 console.log(`Monitoring Plex server at ${baseUrl}`);
 
@@ -82,7 +85,6 @@ function handleNowPlaying(plexSession) {
     }
 
     const refreshRate = Math.round(POLLING_RATE / 1000);
-    const template = readFileSync("./assets/output-template.html").toString();
     
     content = template.replace("{{refreshRate}}", refreshRate)
       .replace("{{thumbUrl}}", thumbUrl)
@@ -91,7 +93,15 @@ function handleNowPlaying(plexSession) {
       .replace("{{album}}", album);
   }
 
-  writeFileSync(outputFile, content);
+  if (OUTPUT_MODE === "image") {
+    nodeHtmlToImage({
+      output: `./output/image/${OUTPUT_IMAGE_FILENAME}`,
+      html: content
+    });
+  } else {
+    writeFileSync(outputFile, content);
+  }
+
   updateLog(logOutput);
 }
 
