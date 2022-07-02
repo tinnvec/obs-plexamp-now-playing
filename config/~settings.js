@@ -20,6 +20,9 @@ export const OUTPUT_MODE = "text";
 // Filename for text output
 export const OUTPUT_TEXT_FILENAME = "nowplaying.txt";
 
+// Text to display when no song is playing
+export const NO_SONG_TEXT = "Nothing Playing";
+
 // String to add to the end of text output
 export const TEXT_SEPARATOR = " | ";
 
