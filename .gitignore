@@ -3,3 +3,6 @@ config/settings.js
 
 # Text output
 output/text/*.txt
+
+# node modules
+node_modules/
