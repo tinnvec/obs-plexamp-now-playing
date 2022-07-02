@@ -1,3 +1,6 @@
+# node modules
+node_modules/
+
 # App Settings
 config/settings.js
 
@@ -7,5 +10,5 @@ output/text/*.txt
 # HTML output
 output/html/*.html
 
-# node modules
-node_modules/
+# Image output
+output/image/*.png

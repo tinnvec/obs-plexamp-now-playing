@@ -14,17 +14,20 @@ export const PLEX_TOKEN = "";
 
 // --- Output Settings ---
 
-// Output mode: text or html
+// Output mode: text, html, or image
 export const OUTPUT_MODE = "text";
-
-// Filename for text output
-export const OUTPUT_TEXT_FILENAME = "nowplaying.txt";
 
 // Text to display when no song is playing
 export const NO_SONG_TEXT = "Nothing Playing";
 
+// Filename for text output
+export const OUTPUT_TEXT_FILENAME = "nowplaying.txt";
+
 // String to add to the end of text output
 export const TEXT_SEPARATOR = " | ";
+
+// Filename for image output
+export const OUTPUT_IMAGE_FILENAME = "nowplaying.png";
 
 // --- App Settings ---
 
