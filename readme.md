@@ -1,6 +1,8 @@
 # OBS Plexamp Now Playing
 Reads now playing information from Plex server, designed for music use through Plexamp. Output in text, html or image as desired.
 
+![](assets/nowplaying_example.png)
+
 ## Setup
 1. Copy `config/~settings.js` to `config/settings.js` and update it with details specific to your situation.
 2. Run `npm install` for node dependencies.
