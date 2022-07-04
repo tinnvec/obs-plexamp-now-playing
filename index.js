@@ -1,11 +1,11 @@
 import { readFileSync, writeFileSync } from "fs";
-import PlexAPI from "plex-api";
-import { stdout } from "process";
+import fetch from "node-fetch";
 import nodeHtmlToImage from "node-html-to-image";
 import { dirname } from 'path';
+import PlexAPI from "plex-api";
+import { stdout } from "process";
 import { fileURLToPath } from 'url';
-
-import { PLEX_HOSTNAME, PLEX_PORT, PLEX_HTTPS, PLEX_TOKEN, POLLING_RATE, OUTPUT_TEXT_FILENAME, TEXT_SEPARATOR, OUTPUT_MODE, NO_SONG_TEXT, OUTPUT_IMAGE_FILENAME, BACKGROUND_COLOR, TEXT_COLOR_1, TEXT_COLOR_2 } from "./config/settings.js";
+import { PLEX_HOSTNAME, PLEX_PORT, PLEX_HTTPS, PLEX_TOKEN, POLLING_RATE, OUTPUT_TEXT_FILENAME, TEXT_SEPARATOR, OUTPUT_MODE, NO_SONG_TEXT, OUTPUT_IMAGE_FILENAME } from "./config/settings.js";
 
 const CWD = dirname(fileURLToPath(import.meta.url));
 const BASE_URL = `http${PLEX_HTTPS ? "s": ""}://${PLEX_HOSTNAME}:${PLEX_PORT}`;
@@ -23,7 +23,7 @@ setInterval(() => {
     .then(handleNowPlaying, handleQueryError);
 }, POLLING_RATE);
 
-function handleNowPlaying(plexSession) {
+async function handleNowPlaying(plexSession) {
   if (plexSession === undefined) {
     console.log("\nERROR: Can't find Plex session");
     return;
@@ -83,6 +83,10 @@ function handleNowPlaying(plexSession) {
       title = NO_SONG_TEXT;
     } else {
       thumbUrl = `${BASE_URL}${plexThumb}?X-Plex-Token=${PLEX_TOKEN}`;
+      const thumbExists = await imageExists(thumbUrl);
+      if (!thumbExists) {
+        thumbUrl = blankThumbUri;
+      }
       logOutput = `${artist} - ${title}`;
     }
 
@@ -111,6 +115,14 @@ function handleNowPlaying(plexSession) {
 
 function handleQueryError(error) {
   console.log(`\n${error}`);
+}
+
+async function imageExists(url) {
+  const response = await fetch(url);
+  const blob = await response.blob();
+  // Plex still responds with a 200 status even if the image can't be found.
+  // The blob size is 150 when coming back blank, actual images are larger
+  return blob.size !== 150;
 }
 
 // Rewrites final line of stdout
