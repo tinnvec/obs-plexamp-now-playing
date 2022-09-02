@@ -82,11 +82,17 @@ async function handleNowPlaying(plexSession) {
       logOutput = NO_SONG_TEXT;
       title = NO_SONG_TEXT;
     } else {
+      if (plexThumb === undefined) {
+        thumbUrl = blankThumbUri;
+      } else {
       thumbUrl = `${BASE_URL}${plexThumb}?X-Plex-Token=${PLEX_TOKEN}`;
       const thumbExists = await imageExists(thumbUrl);
+
       if (!thumbExists) {
         thumbUrl = blankThumbUri;
       }
+      }
+
       logOutput = `${artist} - ${title}`;
     }
 
