@@ -85,12 +85,12 @@ async function handleNowPlaying(plexSession) {
       if (plexThumb === undefined) {
         thumbUrl = blankThumbUri;
       } else {
-      thumbUrl = `${BASE_URL}${plexThumb}?X-Plex-Token=${PLEX_TOKEN}`;
-      const thumbExists = await imageExists(thumbUrl);
+        thumbUrl = `${BASE_URL}${plexThumb}?X-Plex-Token=${PLEX_TOKEN}`;
+        const thumbExists = await imageExists(thumbUrl);
 
-      if (!thumbExists) {
-        thumbUrl = blankThumbUri;
-      }
+        if (!thumbExists) {
+          thumbUrl = blankThumbUri;
+        }
       }
 
       logOutput = `${artist} - ${title}`;
@@ -107,11 +107,12 @@ async function handleNowPlaying(plexSession) {
   }
 
   if (OUTPUT_MODE === "image") {
-    nodeHtmlToImage({
-      output: `${CWD}/output/image/${OUTPUT_IMAGE_FILENAME}`,
-      transparent: true,
-      html: content
-    });
+      nodeHtmlToImage({
+        output: `${CWD}/output/image/${OUTPUT_IMAGE_FILENAME}`,
+        transparent: true,
+        html: content,
+        waitUntil: "domcontentloaded"
+      });
   } else {
     writeFileSync(outputFile, content);
   }
