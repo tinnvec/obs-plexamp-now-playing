@@ -36,9 +36,10 @@ async function handleNowPlaying(plexSession) {
     return;
   }
 
+  const mediaIsPlaying = sessionMediaContainer.size !== 0;
   const sessionMetadata = sessionMediaContainer.Metadata;
 
-  if (sessionMediaContainer.size !== 0 && sessionMetadata === undefined) {
+  if (mediaIsPlaying && sessionMetadata === undefined) {
     console.log("\nERROR: Can't find MediaContainer Metadata");
     return;
   }
@@ -48,7 +49,7 @@ async function handleNowPlaying(plexSession) {
   let title = "";
   let plexThumb = "";
 
-  if (sessionMediaContainer.size !== 0) {
+  if (mediaIsPlaying) {
     const currentSong = sessionMetadata[0];
 
     artist = currentSong.grandparentTitle;
@@ -64,7 +65,7 @@ async function handleNowPlaying(plexSession) {
   if (OUTPUT_MODE === "text") {
     outputFile = `${CWD}/output/text/${OUTPUT_TEXT_FILENAME}`;
     
-    if (sessionMediaContainer.size === 0) {
+    if (!mediaIsPlaying) {
       content = NO_SONG_TEXT;
     } else {
       content = `${artist} - ${title}`;
@@ -77,7 +78,7 @@ async function handleNowPlaying(plexSession) {
 
     let thumbUrl;
 
-    if (sessionMediaContainer.size === 0) {
+    if (!mediaIsPlaying) {
       thumbUrl = blankThumbUri;
       logOutput = NO_SONG_TEXT;
       title = NO_SONG_TEXT;
