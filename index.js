@@ -3,7 +3,7 @@ import fetch from "node-fetch";
 import nodeHtmlToImage from "node-html-to-image";
 import { dirname } from 'path';
 import PlexAPI from "plex-api";
-import { stdout } from "process";
+import readline from "readline";
 import { fileURLToPath } from 'url';
 import { PLEX_HOSTNAME, PLEX_PORT, PLEX_HTTPS, PLEX_TOKEN, POLLING_RATE, OUTPUT_TEXT_FILENAME, TEXT_SEPARATOR, OUTPUT_MODE, NO_SONG_TEXT, OUTPUT_IMAGE_FILENAME } from "./config/settings.js";
 
@@ -19,8 +19,8 @@ const client = new PlexAPI({ hostname: PLEX_HOSTNAME, port: PLEX_PORT, https: PL
 console.log(`Monitoring Plex server at ${BASE_URL}`);
 
 setInterval(() => {
-  client.query("/status/sessions")
-    .then(handleNowPlaying, handleQueryError);
+    client.query("/status/sessions")
+      .then(handleNowPlaying, handleQueryError);
 }, POLLING_RATE);
 
 async function handleNowPlaying(plexSession) {
@@ -82,11 +82,17 @@ async function handleNowPlaying(plexSession) {
       logOutput = NO_SONG_TEXT;
       title = NO_SONG_TEXT;
     } else {
-      thumbUrl = `${BASE_URL}${plexThumb}?X-Plex-Token=${PLEX_TOKEN}`;
-      const thumbExists = await imageExists(thumbUrl);
-      if (!thumbExists) {
+      if (plexThumb === undefined) {
         thumbUrl = blankThumbUri;
+      } else {
+        thumbUrl = `${BASE_URL}${plexThumb}?X-Plex-Token=${PLEX_TOKEN}`;
+        const thumbExists = await imageExists(thumbUrl);
+
+        if (!thumbExists) {
+          thumbUrl = blankThumbUri;
+        }
       }
+
       logOutput = `${artist} - ${title}`;
     }
 
@@ -101,11 +107,12 @@ async function handleNowPlaying(plexSession) {
   }
 
   if (OUTPUT_MODE === "image") {
-    nodeHtmlToImage({
-      output: `${CWD}/output/image/${OUTPUT_IMAGE_FILENAME}`,
-      transparent: true,
-      html: content
-    });
+      nodeHtmlToImage({
+        output: `${CWD}/output/image/${OUTPUT_IMAGE_FILENAME}`,
+        transparent: true,
+        html: content,
+        waitUntil: "domcontentloaded"
+      });
   } else {
     writeFileSync(outputFile, content);
   }
@@ -127,7 +134,7 @@ async function imageExists(url) {
 
 // Rewrites final line of stdout
 function updateLog(text) {
-  stdout.clearLine(0);
-  stdout.cursorTo(0);
-  stdout.write(text);
+  readline.clearLine(process.stdout)
+  readline.cursorTo(process.stdout, 0);
+  process.stdout.write(text);
 }
