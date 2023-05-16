@@ -111,7 +111,7 @@ async function handleNowPlaying(plexSession) {
         output: `${CWD}/output/image/${OUTPUT_IMAGE_FILENAME}`,
         transparent: true,
         html: content,
-        waitUntil: "domcontentloaded"
+        waitUntil: "networkidle0"
       });
   } else {
     writeFileSync(outputFile, content);
