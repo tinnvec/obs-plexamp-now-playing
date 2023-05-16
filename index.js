@@ -5,7 +5,7 @@ import { dirname } from 'path';
 import PlexAPI from "plex-api";
 import readline from "readline";
 import { fileURLToPath } from 'url';
-import { PLEX_HOSTNAME, PLEX_PORT, PLEX_HTTPS, PLEX_TOKEN, POLLING_RATE, OUTPUT_TEXT_FILENAME, TEXT_SEPARATOR, OUTPUT_MODE, NO_SONG_TEXT, OUTPUT_IMAGE_FILENAME } from "./config/settings.js";
+import { PLEX_HOSTNAME, PLEX_PORT, PLEX_HTTPS, PLEX_TOKEN, POLLING_RATE, OUTPUT_TEXT_FILENAME, TEXT_SEPARATOR, OUTPUT_MODE, NO_SONG_TEXT, OUTPUT_IMAGE_FILENAME, WATCH_USERNAME } from "./config/settings.js";
 
 const CWD = dirname(fileURLToPath(import.meta.url));
 const BASE_URL = `http${PLEX_HTTPS ? "s": ""}://${PLEX_HOSTNAME}:${PLEX_PORT}`;
@@ -50,7 +50,7 @@ async function handleNowPlaying(plexSession) {
   let plexThumb = "";
 
   if (mediaIsPlaying) {
-    const currentSong = sessionMetadata[0];
+    const currentSong = sessionMetadata.find(m => m.User.title === WATCH_USERNAME);
 
     artist = currentSong.grandparentTitle;
     album = currentSong.parentTitle;

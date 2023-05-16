@@ -12,6 +12,9 @@ export const PLEX_HTTPS = false;
 // Plex token, to obtain see: https://support.plex.tv/articles/204059436-finding-an-authentication-token-x-plex-token/
 export const PLEX_TOKEN = "";
 
+// Username to watch for playing tracks
+export const WATCH_USERNAME = ""
+
 // --- Output Settings ---
 
 // Output mode: text, html, or image
@@ -31,5 +34,5 @@ export const OUTPUT_IMAGE_FILENAME = "nowplaying.png";
 
 // --- App Settings ---
 
-// Rate to read play queue file, in milliseconds
+// Rate to read play queue, in milliseconds
 export const POLLING_RATE = 1000;
