@@ -86,11 +86,11 @@ async function handleNowPlaying(plexSession) {
       if (plexThumb === undefined) {
         thumbUrl = blankThumbUri;
       } else {
+        thumbUrl = `${BASE_URL}${plexThumb}?X-Plex-Token=${PLEX_TOKEN}`;
+
         const thumbExists = await imageExists(thumbUrl);
 
-        if (thumbExists) {
-          thumbUrl = `${BASE_URL}${plexThumb}?X-Plex-Token=${PLEX_TOKEN}`;
-        } else {
+        if (!thumbExists) {
           thumbUrl = blankThumbUri;
         }
       }
