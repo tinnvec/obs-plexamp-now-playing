@@ -5,7 +5,7 @@ import { dirname } from 'path';
 import PlexAPI from "plex-api";
 import readline from "readline";
 import { fileURLToPath } from 'url';
-import { PLEX_HOSTNAME, PLEX_PORT, PLEX_HTTPS, PLEX_TOKEN, POLLING_RATE, OUTPUT_TEXT_FILENAME, TEXT_SEPARATOR, OUTPUT_MODE, NO_SONG_TEXT, OUTPUT_IMAGE_FILENAME } from "./config/settings.js";
+import { PLEX_HOSTNAME, PLEX_PORT, PLEX_HTTPS, PLEX_TOKEN, POLLING_RATE, OUTPUT_TEXT_FILENAME, TEXT_SEPARATOR, OUTPUT_MODE, NO_SONG_TEXT, OUTPUT_IMAGE_FILENAME, WATCH_USERNAME } from "./config/settings.js";
 
 const CWD = dirname(fileURLToPath(import.meta.url));
 const BASE_URL = `http${PLEX_HTTPS ? "s": ""}://${PLEX_HOSTNAME}:${PLEX_PORT}`;
@@ -36,9 +36,10 @@ async function handleNowPlaying(plexSession) {
     return;
   }
 
+  const mediaIsPlaying = sessionMediaContainer.size !== 0;
   const sessionMetadata = sessionMediaContainer.Metadata;
 
-  if (sessionMediaContainer.size !== 0 && sessionMetadata === undefined) {
+  if (mediaIsPlaying && sessionMetadata === undefined) {
     console.log("\nERROR: Can't find MediaContainer Metadata");
     return;
   }
@@ -48,8 +49,8 @@ async function handleNowPlaying(plexSession) {
   let title = "";
   let plexThumb = "";
 
-  if (sessionMediaContainer.size !== 0) {
-    const currentSong = sessionMetadata[0];
+  if (mediaIsPlaying) {
+    const currentSong = sessionMetadata.find(m => m.User.title === WATCH_USERNAME);
 
     artist = currentSong.grandparentTitle;
     album = currentSong.parentTitle;
@@ -64,7 +65,7 @@ async function handleNowPlaying(plexSession) {
   if (OUTPUT_MODE === "text") {
     outputFile = `${CWD}/output/text/${OUTPUT_TEXT_FILENAME}`;
     
-    if (sessionMediaContainer.size === 0) {
+    if (!mediaIsPlaying) {
       content = NO_SONG_TEXT;
     } else {
       content = `${artist} - ${title}`;
@@ -77,7 +78,7 @@ async function handleNowPlaying(plexSession) {
 
     let thumbUrl;
 
-    if (sessionMediaContainer.size === 0) {
+    if (!mediaIsPlaying) {
       thumbUrl = blankThumbUri;
       logOutput = NO_SONG_TEXT;
       title = NO_SONG_TEXT;
@@ -85,10 +86,11 @@ async function handleNowPlaying(plexSession) {
       if (plexThumb === undefined) {
         thumbUrl = blankThumbUri;
       } else {
-        thumbUrl = `${BASE_URL}${plexThumb}?X-Plex-Token=${PLEX_TOKEN}`;
         const thumbExists = await imageExists(thumbUrl);
 
-        if (!thumbExists) {
+        if (thumbExists) {
+          thumbUrl = `${BASE_URL}${plexThumb}?X-Plex-Token=${PLEX_TOKEN}`;
+        } else {
           thumbUrl = blankThumbUri;
         }
       }
@@ -111,7 +113,7 @@ async function handleNowPlaying(plexSession) {
         output: `${CWD}/output/image/${OUTPUT_IMAGE_FILENAME}`,
         transparent: true,
         html: content,
-        waitUntil: "domcontentloaded"
+        waitUntil: "networkidle0"
       });
   } else {
     writeFileSync(outputFile, content);
